@@ -107,7 +107,7 @@ module Vend
     end
 
     def endpoint_with_scopes
-      endpoint + scopes.join
+      endpoint
     end
 
   protected
@@ -116,13 +116,28 @@ module Vend
 
   protected
 
+    def modified_request_args
+      request_args.tap do |args|
+        args[:url_params].merge!(scope_args) if args[:url_params]
+      end
+    end
+
+    def scope_args
+      scopes.reduce(Hash.new) do |memo, scope|
+        memo[scope.name] = scope.value
+
+        memo
+      end
+    end
+
     def get_next_page
       if last_page?
         raise PageOutOfBoundsError.new(
           "get_next_page called when already on last page"
         )
       end
-      self.response = client.request(url, request_args)
+
+      self.response = client.request(url, modified_request_args)
     end
   end
 end

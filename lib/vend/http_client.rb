@@ -70,13 +70,12 @@ module Vend
             end
       ssl = (url.scheme == 'https')
       http = get_http_connection(url.host, url.port, ssl)
-
       # FIXME: extract method
       method = ("Net::HTTP::" + options[:method].to_s.classify).constantize
+
       request = method.new(url.path + url_params_for(options[:url_params]))
       request.basic_auth username, password if username && password
       request['Authorization'] = "Bearer #{auth_token}" if auth_token
-
       request.body = options[:body] if options[:body]
       logger.debug url
       response = http.request(request)
@@ -112,6 +111,7 @@ module Vend
 
     def url_params_for(options)
       ary = []
+
       if !options.nil?
         options.each do |option, value|
           if value.class == Array
